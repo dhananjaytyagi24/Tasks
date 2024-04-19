@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Tasks.Models;
+using Tasks.Repository;
 
 namespace Tasks.Controllers
 {
@@ -10,23 +11,34 @@ namespace Tasks.Controllers
     {
         private readonly TaskDataStore _taskDataStore;
         private readonly ILogger<TasksController> _logger;
+        private readonly ITaskRepository _taskRepository;
 
-        public TasksController(TaskDataStore taskDataStore, ILogger<TasksController> logger)
+        public TasksController(TaskDataStore taskDataStore, ILogger<TasksController> logger, ITaskRepository taskRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _taskDataStore = taskDataStore ?? throw new ArgumentNullException(nameof(taskDataStore));
+            _taskRepository = taskRepository ?? throw new ArgumentNullException(nameof(taskRepository));
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<TaskDto>> GetTasks()
         {
-            return Ok(_taskDataStore.Tasks);
+            var tasks = _taskRepository.GetTasks();
+            if (tasks == null)
+            {
+                throw new Exception("Failed to get all Tasks");
+            }
+            return Ok(tasks);
         }
 
         [HttpGet("{taskId}", Name = "GetTask")]
         public ActionResult<TaskDto> GetTask([FromRoute] Guid taskId)
         {
-            var task = _taskDataStore.Tasks.Where(x => x.Id == taskId).SingleOrDefault();
+            if (taskId == Guid.Empty)
+            {
+                throw new ArgumentNullException($"TaskId was either null or empty: {taskId}");
+            }
+            var task = _taskRepository.GetTask(taskId.ToString());
 
             if (task == null)
             {
@@ -42,17 +54,10 @@ namespace Tasks.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid create request");
+                return BadRequest("Invalid create task request");
             }
-            var newTask = new TaskDto();
-            newTask.Id = Guid.NewGuid();
-            newTask.CreatedAt = DateTime.Now;
-            newTask.IsCompleted = false;
-            newTask.Description = createTaskDto.Description;
-            newTask.Importance = createTaskDto.Importance;
-            newTask.DaysTaken = newTask.DaysTaken;
 
-            _taskDataStore.Tasks.Add(newTask);
+            var newTask = _taskRepository.CreateTask(createTaskDto);
 
             return CreatedAtRoute("GetTask", new { taskId = newTask.Id }, newTask);
 

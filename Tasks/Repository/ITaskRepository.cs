@@ -4,9 +4,10 @@ namespace Tasks.Repository
 {
     public interface ITaskRepository
     {
-        public IEnumerable<TaskDto> GetTasksAsync();
+        public IEnumerable<TaskDto> GetTasks();
 
         public TaskDto GetTask(string taskId);
-        //public Task CreateTaskAsync();
+
+        public TaskDto CreateTask(CreateTaskDto createTaskDto);
     }
 }

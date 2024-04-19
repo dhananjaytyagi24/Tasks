@@ -12,6 +12,7 @@ namespace Tasks.Models
         public ImportanceEnum Importance { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue)]
         public int DaysTaken { get; set; }
     }
 }
