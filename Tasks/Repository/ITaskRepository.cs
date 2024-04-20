@@ -9,5 +9,9 @@ namespace Tasks.Repository
         public TaskDto GetTask(string taskId);
 
         public TaskDto CreateTask(CreateTaskDto createTaskDto);
+
+        public void UpdateTask(Guid taskId, UpdateTaskDto updateTaskDto);
+
+        public void DeleteTask(Guid taskId);
     }
 }

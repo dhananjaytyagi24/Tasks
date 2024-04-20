@@ -46,5 +46,34 @@ namespace Tasks.Repository
                 throw new Exception("Unable to create new Task");
             }
         }
+
+        public void UpdateTask(Guid taskId, UpdateTaskDto updateTaskDto)
+        {
+            var task = _dataStore.Tasks.FirstOrDefault(x => x.Id == taskId);
+            if(task == null)
+            {
+                throw new Exception($"No task found to update with id: {taskId}");
+            }
+
+            task.Description = updateTaskDto.Description;
+            task.DaysTaken = updateTaskDto.DaysTaken;
+            task.Importance = updateTaskDto.Importance;
+            task.IsCompleted = updateTaskDto.IsCompleted;
+
+            return;
+        }
+
+        public void DeleteTask(Guid taskId)
+        {
+            var task = _dataStore.Tasks.FirstOrDefault(x => x.Id == taskId);
+            if (task == null)
+            {
+                throw new Exception($"No task found to update with id: {taskId}");
+            }
+
+            _dataStore.Tasks.Remove(task);
+
+            return;
+        }
     }
 }
